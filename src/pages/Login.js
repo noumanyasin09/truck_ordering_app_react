@@ -20,8 +20,14 @@ const Login = () => {
             console.log(response.data.data.token);
             const token = response.data.data.token; // Assuming the token comes in this format
             const name = response.data.data.name; 
+
             localStorage.setItem('token', token);
-            localStorage.setItem('name', name);  // Save token,name to localStorage
+            localStorage.setItem('name', name); 
+            localStorage.setItem('login_time', Date.now());
+            // Set session expiry time to 1 hour
+            const sessionExpiryTime = Date.now() + 3600000; // 1 hour from now
+            localStorage.setItem('session_expiry', sessionExpiryTime);
+
             setError(null);  // Clear any previous errors
             navigate('/dashboard');  // Redirect to dashboard after successful login
         }else {
