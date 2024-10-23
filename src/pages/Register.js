@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+const api = axios.create({
+  baseURL: process.env.REACT_APP_BASE_URL,  // This reads from .env
+});
+
 const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -21,30 +25,32 @@ const Register = () => {
   };
 
   const validateForm = () => {
-    const { name, email, password, c_password } = formData;
-    setError('');
-
-    // Check if fields are empty
-    if (!name || !email || !password || !c_password) {
-      return 'All fields are required.';
+    let errors = {};
+  
+    if (!formData.name || formData.name.trim() === '') {
+      errors.name = 'Name is required';
     }
-
-    // Validate email format
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-      return 'Please enter a valid email address.';
+  
+    if (!formData.email) {
+      errors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = 'Email address is invalid';
     }
-
-    // Validate password length and match
-    if (password.length < 6) {
-      return 'Password must be at least 6 characters long.';
+  
+    if (!formData.password) {
+      errors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      errors.password = 'Password must be at least 6 characters';
     }
-    if (password !== c_password) {
-      return 'Passwords do not match.';
+  
+    if (formData.password !== formData.c_password) {
+      errors.c_password = 'Passwords do not match';
     }
-
-    return null; // No errors
+  
+    return Object.keys(errors).length > 0 ? errors : null;
   };
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -54,9 +60,8 @@ const Register = () => {
       setError(validationError);
       return;
     }
-
     try {
-      const response = await axios.post('http://localhost:8000/api/auth/register', {
+      const response = await api.post('auth/register', {
         name: formData.name,
         email: formData.email,
         password: formData.password,
@@ -79,11 +84,19 @@ const Register = () => {
       // Redirect to dashboard
       navigate('/dashboard');
     } catch (error) {
-      // Handle error response
-      if (error.response && error.response.data) {
-        setError(error.response.data.message || 'An error occurred during registration.');
+      if (error.response && error.response.data.errors) {
+        // Set the errors from Laravel's response
+        const apiErrors = error.response.data.errors;
+        
+        // Convert Laravel error object to a more readable format
+        const formattedErrors = Object.keys(apiErrors).reduce((acc, key) => {
+          acc[key] = apiErrors[key][0];  // Assuming each error array has one message
+          return acc;
+        }, {});
+        
+        setError(formattedErrors);  // Set the formatted errors in the state
       } else {
-        setError('Network error, please try again.');
+        setError({ general: 'Network error, please try again.' });
       }
       setSuccessMessage('');
     }
@@ -98,8 +111,13 @@ const Register = () => {
         </div>
         <div className="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
           <div className="card-body">
-            {error && <div className="alert alert-error">{error}</div>} {/* Error Message */}
-            {successMessage && <div className="alert alert-success">{successMessage}</div>} {/* Success Message */}
+          <div>
+  {error && Object.keys(error).map((field) => (
+    <div key={field} style={{ color: 'red' }}>
+      {error[field]}  {/* Display error message for each field */}
+    </div>
+  ))}
+</div>
             <form onSubmit={handleSubmit}>
               <div className="form-control">
                 <label className="label">

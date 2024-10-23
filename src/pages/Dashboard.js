@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+const api = axios.create({
+  baseURL: process.env.REACT_APP_BASE_URL, // This reads from .env
+});
+
 const Dashboard = () => {
   const [requests, setRequests] = useState([]);
   const navigate = useNavigate();
@@ -10,7 +14,7 @@ const Dashboard = () => {
   const fetchRequests = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:8000/api/orders', {
+      const response = await api.get('orders', {
         headers: {
           Authorization: `Bearer ${token}`,
         },

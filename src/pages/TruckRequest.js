@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+const api = axios.create({
+  baseURL: process.env.REACT_APP_BASE_URL, // This reads from .env
+});
+
 const TruckRequest = () => {
     const navigate = useNavigate();
     useEffect(() => {
@@ -41,7 +45,7 @@ const TruckRequest = () => {
 
     try {
       const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
-      const response = await axios.post('http://localhost:8000/api/orders', formData, {
+      const response = await api.post('orders', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
