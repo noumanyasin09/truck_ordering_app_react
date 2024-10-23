@@ -63,23 +63,30 @@ const Dashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {requests.map((request) => (
-              <tr key={request.id}>
-                <td>{request.id}</td>
-                <td>{request.pickup_location}</td>
-                <td>{request.delivery_location}</td>
-                <td>{request.size}</td>
-                <td>{request.weight}</td>
-                <td>{new Date(request.pickup_time).toLocaleString()}</td>
-                <td>{new Date(request.delivery_time).toLocaleString()}</td>
-                <td>
-                  <span className={`badge ${getStatusColor(request.status)}`}>
-                    {request.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
+  {requests && requests.length > 0 ? (
+    requests.map((request) => (
+      <tr key={request.id}>
+        <td>{request.id}</td>
+        <td>{request.pickup_location}</td>
+        <td>{request.delivery_location}</td>
+        <td>{request.size}</td>
+        <td>{request.weight}</td>
+        <td>{new Date(request.pickup_time).toLocaleString()}</td>
+        <td>{new Date(request.delivery_time).toLocaleString()}</td>
+        <td>
+          <span className={`badge ${getStatusColor(request.status)}`}>
+            {request.status}
+          </span>
+        </td>
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan="8">No data available</td>
+    </tr>
+  )}
+</tbody>
+
         </table>
       </div>
     </div>
